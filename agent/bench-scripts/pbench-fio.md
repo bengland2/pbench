@@ -200,7 +200,9 @@ Then you construct a fio job file for your initial sequential tests, and this wi
 
 And you write it to a file named fio-sequential.job, then run it with a command like this one, which launches fio on 1K guests with json output format.
 
-    /usr/local/bin/fio --client-file=vms.list --pre-iteration-script=drop-cache.sh --rw=write,read -b 4,128,1024 -d /mnt/fio/files --max-jobs=1024 --output-format=json fio-sequential.job
+    /usr/local/bin/fio --client-file=vms.list --pre-iteration-script=drop-cache.sh \
+       --rw=write,read -b 4,128,1024 -d /mnt/fio/files --max-jobs=1024 \
+       --output-format=json fio-sequential.job
 
 This will write the files in parallel to the mount point.  The sequential read test that follows can use the same job file.  The **--max-jobs** parameter should match the count of the number of records in the vms.list file (FIXME: is --max-jobs still needed?).
 
@@ -228,5 +230,5 @@ For random writes, the job file is a little more complicated.  Again the `[globa
 The random read test can be performed using the same job file if you want.
 
     /usr/local/bin/fio --client-file=vms.list --pre-iteration-script=drop-cache.sh \
-        --rw=write,read -b 4,128,1024 -d /mnt/fio/files --max-jobs=1024 \
+        --rw=randwrite,randread -b 4,128,1024 -d /mnt/fio/files --max-jobs=1024 \
         --output-format=json fio-random.job
