@@ -128,7 +128,23 @@ For FUSE filesystems such as Gluster or Cephfs, the above procedure would not be
 
 Containers are more like processes than VMs, so that dropping Linux buffer cache on the node running the containers should be sufficient in most cases.
 
+# warming up the system
+
+If you drop cache, you need to allow the system to warm up its caches and reach steady-state behavior.  It is desirable for there to be no free memory either for most of test so that memory recycling behavior is tested.  So you may need considerable runtime at large scale.  You can specify maximum fio runtime using **runtime=k** line in job file where k is number of seconds.  Using pbench-fio you can observe the warmup behavior and see if your time duration needs adjustment.
+
+For cases where the file can be completely read/written before the test duration has finished, if you don't want the test to stop, you must specify **time_based=1** to force fio to keep doing I/O to the file.  For example, on sequential files, if it reaches the end of file, it will seek to beginning of the file and start over.   On random I/O, it will keep generating random offsets even if the entire file has been accessed.
+
+# rate-limiting IOPS
+
+A successful test should show both high throughput and acceptable latency.  For random I/O tests, it is possible to bring the system to its knees by putting way more random I/O requests in flight than there are block devices to service them (i.e. increasing queue depth).  This can artificially drive up response time.  You can reduce queue depth by reducing **iodepth=k** parameter in the job file or reducing number of concurrent fio processes.  But another method that may be useful is to reduce the rate at which each fio process issues random I/O requests to a lower value than it would otherwise have.  You can do this with the **rate_iops=k** parameter in the job file.  For example, this was used to run a large cluster at roughly 3/4 of its throughput capacity for latency measurements.
+
+# measuring latency percentiles as a function of time
+
+Usually when a latency requirement is defined in a SLA (service-level agreement) for a cluster, the implication is that *at any point in time* during the operation of the cluster, the Nth latency percentile will not exceed X seconds.  However, fio does not output that information directly in its normal logs - instead it outputs latency percentiles measured over the duration of the entire test run.  For short test this may be sufficient, but for longer tests or tests designed to measure *changes* in latency, you need to capture the variation in latency percentiles over time.   The new fio histogram logging feature helps you do that.  It uses the histogram data structures internal to every fio process, emitting this histogram to a log file at a user-specified interval.  A post-processing tool, [fiologparser-hist.py](https://github.com/axboe/fio/blob/master/tools/hist/fiologparser_hist.py), then reads in these histogram logs and outputs latency percentiles over time.   pbench's postprocessing tool runs it and then graphs the results.  The job file parameters **write_hist_log=h** and **hist_log_msec** control the pathnames and interval for histogram logging.
+
 # example of use case for OpenStack Cinder volumes
+
+Advice: do everything on smallest possible scale to start with, until you get your input files to work, then scale it out.
 
 construct a list of virtual machine IP addresses which are reachable from your test driver with ssh using no password.  These virtual machines should all have a cinder volume attached (i.e. /dev/vdb inside VM).  You should format the cinder volume from inside the VM with a Linux filesystem such as XFS
 
@@ -147,17 +163,17 @@ Now format the filesystems for each cinder volume and mount them:
 
     testdriver# mypdsh -f 128 'mkfs -t xfs /dev/vdb && mkdir -p /mnt/fio && mount -t xfs -o noatime /dev/vdb /mnt/fio && mkdir /mnt/fio/files'
            
-Then you construct a fio job file for your initial sequential write test, and this will also create the files for the subsequent tests.   It might look something like this:
+Then you construct a fio job file for your initial sequential tests, and this will also create the files for the subsequent tests.  certain parameters have to be specified with the string `$@` because pbench-fio wants to fill them in.   It might look something like this:
 
 `[global]
-# size of each FIO file
-size=95g
+# size of each FIO file (in MB)
+size=$@
 # do not use gettimeofday, much too expensive for KVM guests
 clocksource=clock_gettime
 # give fio workers some time to get launched on remote hosts
 startdelay=5
 # files accessed by fio are in this directory
-directory=/mnt/fio/files
+directory=$@
 # write fio latency logs in /var/tmp with "fio" prefix
 write_lat_log=/var/tmp/fio
 # write a record to latency log once per second
@@ -170,28 +186,47 @@ log_hist_msec=10
 numjobs=1
 # do an fsync on file before closing it (has no effect for reads)
 fsync_on_close=1
+# what's this?
+per_job_logs=1
 
-[seqwrite]
-rw=write
-bs=4k
+[sequential]
+rw=$@
+bs=$@
+
 # do not lay out the file before the write test, 
 # create it as part of the write test
 create_on_open=1
 # do not create just one file at a time
 create_serialize=0`
 
-This will write the files in parallel to the mount point.  Next comes sequential read test, which has the same `[global]` section as the previous write test, only the `[seqwrite]` section is replaced with a `[seqread]` section:
+And you write it to a file named fio-sequential.job, then run it with a command like this one, which launches fio on 1K guests with json output format.
 
-`[seqread]
-rw=read
-bs=4k`
+/usr/local/bin/fio --client-file=vms.list --pre-iteration-script=drop-cache.sh --rw=write,read -b 4,128,1024 -d /mnt/fio/files --max-jobs=1024 --output-format=json fio-sequential.job
+
+This will write the files in parallel to the mount point.  The sequential read test that follows can use the same job file.  The **--max-jobs** parameter should match the count of the number of records in the vms.list file (FIXME: is --max-jobs still needed?).
 
 Since we are using buffered I/O, we can usually get away with using a small transfer size, since the kernel will do prefetching, but there are exceptions, and you may need to vary the **bs** parameter.
 
 For random writes, the job file is a little more complicated.  Again the `[global]` section is the same but the workload-specific part needs to be more complex to express some new parameters:
 
-`[randwrite]
-rw=randwrite
-bs=4k`
+`[random]
+rw=$@
+bs=$@
+# specify use of libaio 
+# to allow a single thread to launch multiple parallel I/O requests
+ioengine=libaio
+# how many parallel I/O requests should be attempted
+iodepth=4
+# use O_DIRECT flag when opening a file
+direct=1
+# when the test is done and the file is closed, do an fsync first
+fsync_on_close=1
+# if we finish randomly accessing entire file, keep going until time is up
+time_based=1
+# test for 1/2 hour (gives caches time to warm up on large cluster)
+runtime=1800`
 
+The random read test can be performed using the same job file if you want.
+
+/usr/local/bin/fio --client-file=vms.list --pre-iteration-script=drop-cache.sh --rw=write,read -b 4,128,1024 -d /mnt/fio/files --max-jobs=1024 --output-format=json fio-random.job
 
