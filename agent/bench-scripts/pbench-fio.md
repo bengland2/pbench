@@ -1,11 +1,15 @@
 
-This page describes how to use pbench-fio to do storage performance testing.  It includes:
+This page describes how to use pbench-fio to do storage performance testing.  It includes these topics:
 
-* random and sequential workload parameters
-* how to do cache dropping
-* how to ramp up tests gradually for large host counts
+* [random](#random-workloads) and [sequential](#sequential-workloads) workload parameters
+* [cache dropping](#cache-dropping)
+* [when and how](#warming-up-the-system) to ramp up workload
+* ensure [persistent writes](#data-persistence)
+* [rate limiting](#limiting-IOPS)
+* measure [latency percentile change over time](#measuring-latency-percentiles)
+* example from [OpenStack Cinder testing](#example-of-openstack-cinder-volumes)
 
-Before we go into the details of the pbench-fio parameters, 
+Before we go into the [syntax details](#syntax) of pbench-fio parameters, 
 which are different in some cases than the fio input parameters, 
 we describe why pbench-fio exists, and how to make use of it.
 
@@ -20,7 +24,7 @@ it uses the **fio --client** option to allow fio to start up a storage performan
 on a set of hosts simultaneously and collect all the results to a central location.
 
 pbench-fio supports ingestion of these results into a repository, 
-such as elastic search, through JSON-formatted results that are easily parsed.  
+such as elastic search, through JSON-formatted results that are easily parsed.
 Traditional fio output is very difficult to parse correctly 
 and the resulting parser is hard to understand and likely to break as fio evolves over time.
 
@@ -34,8 +38,8 @@ collecting and analyzing all the results for us.  That is the dream ;-)
 
 However, here is why this is difficult or even impossible to do:
 
-o applications often do sequential I/O in buffered mode
-o applications often do random I/O in unbuffered mode
+* applications often do sequential I/O in buffered mode
+* applications often do random I/O in unbuffered mode
 
 Unfortunately there is no one set of pbench-fio input parameters 
 that lets you run both sequential and random tests with the same set of parameters, so far.
@@ -83,7 +87,13 @@ For example, we could use **fallocate()** system call to quickly create files
 that span the entire block device, 
 and then randomly read/write only an insignificant fraction of the entire set of files, 
 yet still get representative throughput and latency numbers.  
-The same is true for using fio on block devices.
+The same is true for using fio for random I/O on block devices.  
+
+# data persistence
+
+Performance of writes is usually only interesting if we know that the writes are persistent (will be visible after a client or server abrupt reset (i.e. crash or power-cycle).  Otherwise you may be just writing to RAM.  For sequential writes, this can be accomplished with the fio jobfile parameter **fsync_on_close=1** . For random writes, this can be accomplished with the parameter **--sync=1** .  Technically O_DIRECT open flag does not guarantee persistence of writes, and only specifies that writes bypass buffer cache.  For example, it is possible to do an O_DIRECT write and have it not be persistent if it reaches block device hardware but was never actually written to persistent storage there, and yes this can happen.  O_SYNC means that the driver both issues the write and blocks until the write is guaranteed to persist.  
+
+Obviously O_SYNC can be a performance killer because the application has to wait for the device to respond with status showing that the write is now persistent.  So for random workloads it is possible to use asynchronous I/O to get many requests of this type to be submitted simultaneously - now the device can maintain an internal queue of active requests and the host can keep the device busy and also schedule I/O more efficiently using the Linux I/O scheduler (typically the **deadline** scheduler).
 
 # how to handle large host counts
 
@@ -134,15 +144,15 @@ If you drop cache, you need to allow the system to warm up its caches and reach 
 
 For cases where the file can be completely read/written before the test duration has finished, if you don't want the test to stop, you must specify **time_based=1** to force fio to keep doing I/O to the file.  For example, on sequential files, if it reaches the end of file, it will seek to beginning of the file and start over.   On random I/O, it will keep generating random offsets even if the entire file has been accessed.
 
-# rate-limiting IOPS
+# limiting IOPS
 
 A successful test should show both high throughput and acceptable latency.  For random I/O tests, it is possible to bring the system to its knees by putting way more random I/O requests in flight than there are block devices to service them (i.e. increasing queue depth).  This can artificially drive up response time.  You can reduce queue depth by reducing **iodepth=k** parameter in the job file or reducing number of concurrent fio processes.  But another method that may be useful is to reduce the rate at which each fio process issues random I/O requests to a lower value than it would otherwise have.  You can do this with the **rate_iops=k** parameter in the job file.  For example, this was used to run a large cluster at roughly 3/4 of its throughput capacity for latency measurements.
 
-# measuring latency percentiles as a function of time
+# measuring latency percentiles
 
 Usually when a latency requirement is defined in a SLA (service-level agreement) for a cluster, the implication is that *at any point in time* during the operation of the cluster, the Nth latency percentile will not exceed X seconds.  However, fio does not output that information directly in its normal logs - instead it outputs latency percentiles measured over the duration of the entire test run.  For short test this may be sufficient, but for longer tests or tests designed to measure *changes* in latency, you need to capture the variation in latency percentiles over time.   The new fio histogram logging feature helps you do that.  It uses the histogram data structures internal to every fio process, emitting this histogram to a log file at a user-specified interval.  A post-processing tool, [fiologparser-hist.py](https://github.com/axboe/fio/blob/master/tools/hist/fiologparser_hist.py), then reads in these histogram logs and outputs latency percentiles over time.   pbench's postprocessing tool runs it and then graphs the results.  The job file parameters **write_hist_log=h** and **hist_log_msec** control the pathnames and interval for histogram logging.
 
-# example of use case for OpenStack Cinder volumes
+# example of OpenStack Cinder volumes
 
 Advice: do everything on smallest possible scale to start with, until you get your input files to work, then scale it out.
 
@@ -232,3 +242,44 @@ The random read test can be performed using the same job file if you want.
     /usr/local/bin/fio --client-file=vms.list --pre-iteration-script=drop-cache.sh \
         --rw=randwrite,randread -b 4,128,1024 -d /mnt/fio/files --max-jobs=1024 \
         --output-format=json fio-random.job
+
+# syntax
+
+For syntax details, use the command
+
+    # pbench-fio --help
+
+Note that not all fio parameters are specified by pbench-fio.  See [here](https://github.com/axboe/fio/blob/master/HOWTO)  for a page describing fio parameters in its github repo.  Parameters are part of pbench-fio command in order to allow pbench-fio to iterate over a broad range of tests in a single command.
+
+This section stresses important parameters that are often used.  Where there is both a short-form (single-dash single-character) and a long-form (double-dash verbose) syntax for an option, we refer to it using the long-form syntax here.  
+
+A CSV list is a comma-separated list of values with no embedded spaces.
+
+Parameter data value other than these types are strings which are specified below.
+* int - integer
+* uint - non-negative integer 
+* bool - boolean, in fio this is either 0 (false) or 1 (true)
+
+Here are the pbench-fio parameters:
+
+* **--test-types=type1,type2,...** - CSV list of fio-defined test types.  typical test types are:
+  * write - sequentially write to file/device
+  * read - sequentially read from file/device
+  * randwrite - randomly write to file/device
+  * randread - randomly read from file/device
+  * randrw - use mixed random read/write mix with percentage specified in fio job file
+* **--direct=boolean** - 1 means use **O_DIRECT** flag at open time to bypass buffer cache, default is 0.
+* **--sync=boolean** - 1 means use **O_SYNC** flag at open time, default is 0 (data not guaranteed to be persistent).
+* **--runtime=uint** - run the workload for k seconds (default is to run the workload until the entire file/device has been read/written.
+* **--ramptime=uint** - time in seconds to warm up test before taking measurements (default is 0)
+* **--block-sizes=int,int,...** - CSV list containing block sizes to use.  A "block size" is the I/O request size in KB.
+* **--file-size=s1,s2,...** - specify file sizes to use when tests run on a filesystem.  For files, default is the entire pre-existing file.  For devices, default value is the entire device.
+* **--targets=d1,d2,...** - specify CSV list of directories or block devices.
+* **--directory=path** - single directory where fio operations will be performed (on all hosts)
+* **--ioengine=libaio** - an ioengine is an fio module that uses a specific system call interface or library to generate I/O requests.  The default is sync, which uses conventional (read,write,pread,pwrite) interface, and for POSIX filesystems, an alternative to this for random I/O is the **libaio** interface, which supports asynchronous I/O requests (multiple I/O requests active from a single thread).
+* **--iodepth=uint** - this parameter is only relevant with the **libaio** or other ioengines that support asynchronous I/O requests (not the default sync ioengine).  It specifies how many I/O requests at a time should be active from a single fio thread/process.
+* **--client-file=path** - this is a pbench-fio-specific parameter that specifies a set of workload generators in a text file, 1 hostname/IP per record.  Default is "localhost".
+* **--clients=h1,h2...** - this parameter specifies a set of workload generators as a CSV list of hostname/IP values.  Default is "localhost".
+* **--numjobs=uint** - the total number of "jobs" to run.  This is typically set to the number of clients above.  Typically in the job file, you use numjobs=1.
+* **--pre-iteration-script=path** - this points to a local executable script (doesn't have to be bash) that will execute before each sample is run.  For an example of how this can be useful, see cache-dropping section above.
+* **--max-stddev=uint** - maximum percent deviation (100.0 \* standard deviation / mean) allowed for a successful test.  If you get test failures, consider either lengthening your test, changing test procedure to improve repeatability, or increasing this parameter.  Default is 5%.
