@@ -80,8 +80,10 @@ they only have to allow password-less ssh access from the head node.
 ## firewalls
 
 *you must ensure that the network firewall or poke holes in the firewall for pbench-uperf*.  Typically there are two possible firewall implementations encountered:
+
 * the **firewalld** service
 * the **iptables** service
+
 to temporarily disable (this may give security folks heartburn):
 
     # systemctl stop firewalld
