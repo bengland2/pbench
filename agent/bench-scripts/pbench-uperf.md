@@ -76,6 +76,19 @@ You typically run pbench-uperf from a head node or test driver that has password
 to the set of machines being tested. 
 The hosts running the test do not need ssh access to each other -- 
 they only have to allow password-less ssh access from the head node.
+
+## firewalls
+
+*you must ensure that the network firewall or poke holes in the firewall for pbench-uperf*.  Typically there are two possible firewall implementations encountered:
+* the **firewalld** service
+* the **iptables** service
+to temporarily disable (this may give security folks heartburn):
+
+    # systemctl stop firewalld
+    # systemctl stop iptables
+
+## syntax
+
 Important test parameters are listed in their long form but there is also a short form available with **-h** :
 
 * **--test-types** - stream, rr
