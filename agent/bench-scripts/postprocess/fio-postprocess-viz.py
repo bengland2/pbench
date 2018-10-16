@@ -21,7 +21,7 @@ html = \
 <div id='jschart_latency'>
   <script>
     create_jschart(0, "%s", "jschart_latency", "Percentiles", "Time (msec)", "Latency (usec)",
-        { plotfiles: [ "avg.log", "median.log", "p90.log", "p95.log",
+        { plotfiles: [ "median.log", "p90.log", "p95.log",
                        "p99.log", "min.log", "max.log" ],
           sort_datasets: false, x_log_scale: false
         });
@@ -32,7 +32,7 @@ html = \
 </html>
 """
 
-columns = ["samples", "min", "avg", "median", "p90", "p95", "p99", "max"]
+columns = ["samples", "min", "median", "p90", "p95", "p99", "max"]
 
 def main(ctx):
 
@@ -41,12 +41,17 @@ def main(ctx):
     out_files[i].write("#LABEL:%s\n" % columns[i])
 
   with open(join(ctx.DIR, 'hist.csv'), 'r') as csv:
-    csv.readline()
+    while True:
+      l = csv.readline()
+      if l == None:
+          print('ERROR: hit end of file without seeing header')
+          sys.exit(1)
+      if l.startswith('msec'):
+          break
     for line in csv:
       vs = line.split(', ')
       for i in range(len(columns)):
         out_files[i].write("%d %s\n" % (int(vs[0]), vs[i+1].rstrip()))
-
   chart_type = "xy"
   cp = SafeConfigParser(allow_no_value=True)
   cp.read(ctx.job_file)
