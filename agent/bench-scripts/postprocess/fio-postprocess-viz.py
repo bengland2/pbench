@@ -41,13 +41,12 @@ def main(ctx):
     out_files[i].write("#LABEL:%s\n" % columns[i])
 
   with open(join(ctx.DIR, 'hist.csv'), 'r') as csv:
-    while True:
-      l = csv.readline()
-      if l == None:
-          print('ERROR: hit end of file without seeing header')
-          sys.exit(1)
-      if l.startswith('msec'):
-          break
+    l = csv.readline()
+    while l != None and not l.__contains__('min, median'):
+        l = csv.readline()
+    if l == None:
+        print('ERROR: hit end of file without seeing header')
+        sys.exit(1)
     for line in csv:
       vs = line.split(', ')
       for i in range(len(columns)):
