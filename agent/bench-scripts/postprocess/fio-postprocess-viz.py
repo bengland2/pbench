@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
-import os
-join = os.path.join
+from __future__ import print_function
+
+import sys
+from os.path import join
 try:
     from configparser import SafeConfigParser
 except ImportError:
@@ -36,21 +38,22 @@ columns = ["samples", "min", "median", "p90", "p95", "p99", "max"]
 
 def main(ctx):
 
-  out_files = [open(join(ctx.DIR, "%s.log" % c), 'w') for c in columns]
-  for i in range(len(columns)):
-    out_files[i].write("#LABEL:%s\n" % columns[i])
-
   with open(join(ctx.DIR, 'hist.csv'), 'r') as csv:
-    l = csv.readline()
-    while l != None and not l.__contains__('min, median'):
-        l = csv.readline()
-    if l == None:
-        print('ERROR: hit end of file without seeing header')
+    line = csv.readline()
+    while line and not line.__contains__('min, median'):
+        line = csv.readline()
+    if not line:
+        print('ERROR: hit end of file without seeing header', file=sys.stderr)
         sys.exit(1)
+    out_files = [open(join(ctx.DIR, "%s.log" % c), 'w') for c in columns]
+    for i in range(len(columns)):
+      out_files[i].write("#LABEL:%s\n" % columns[i])
     for line in csv:
       vs = line.split(', ')
       for i in range(len(columns)):
         out_files[i].write("%d %s\n" % (int(vs[0]), vs[i+1].rstrip()))
+    for i in range(len(columns)):
+      out_files[i].close()
   chart_type = "xy"
   cp = SafeConfigParser(allow_no_value=True)
   cp.read(ctx.job_file)

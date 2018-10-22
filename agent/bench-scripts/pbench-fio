@@ -628,9 +628,7 @@ function fio_run_job() {
                 		mkdir -p $benchmark_results_dir/clients/$client/hist
 				# compute per-client latency percentiles
 				$histogram_cmd $benchmark_results_dir/clients/$client/fio_clat_hist.*.log* >$benchmark_results_dir/clients/$client/hist/hist.csv
-                		#if [ -e $benchmark_results_dir/clients/$client/hist/hist.csv ]; then
-					$script_path/postprocess/$benchmark-postprocess-viz.py --job-file=$fio_job_file $benchmark_results_dir/clients/$client/hist
-				#fi
+				$script_path/postprocess/$benchmark-postprocess-viz.py --job-file=$fio_job_file $benchmark_results_dir/clients/$client/hist
 			fi
 			popd >/dev/null
 		done
@@ -638,9 +636,7 @@ function fio_run_job() {
 		if grep -q "^log_hist_msec" $fio_job_file; then
 			mkdir $benchmark_results_dir/hist
 			$histogram_cmd $benchmark_results_dir/clients/*/fio_clat_hist.*.log* >$benchmark_results_dir/hist/hist.csv
-                	if [ -e $benchmark_results_dir/hist/hist.csv ]; then
-				$script_path/postprocess/$benchmark-postprocess-viz.py --job-file=$fio_job_file $benchmark_results_dir/hist
-			fi
+			$script_path/postprocess/$benchmark-postprocess-viz.py --job-file=$fio_job_file $benchmark_results_dir/hist
 		fi
 	else
 		/bin/mv $benchmark_results_dir/*.log $benchmark_results_dir/clients/localhost/
