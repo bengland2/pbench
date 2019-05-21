@@ -575,7 +575,9 @@ function fio_run_job() {
 		for client in `echo $clients | sed -e s/,/" "/g`; do
 			client_opts="$client_opts --client=$client"
 			if [ ! -z $numjobs ]; then
-				let max_jobs=$numjobs
+				# so that a separate filename will be generated
+				# for each (host, job-number) pair
+				let max_jobs=$max_jobs+$numjobs
 			else
 			       for t in `echo $targets | sed -e s/,/" "/g` ; do
 				       let max_jobs=$max_jobs+1
