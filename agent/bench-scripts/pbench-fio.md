@@ -89,6 +89,21 @@ and then randomly read/write only an insignificant fraction of the entire set of
 yet still get representative throughput and latency numbers.  
 The same is true for using fio for random I/O on block devices.  
 
+## shared filesystems
+
+A slightly different set of parameters is needed for pbench-fio to work with shared filesystems (where same set of files
+is shared by multiple clients/mountpoints).  For this to work, you must do 2 things:
+
+* specify --target=my-directory 
+* specify --jobfile=/opt/pbench-agent/bench-scripts/templates/fio-shared-fs.job  
+
+**my-directory** is the shared filesystem mountpoint or some subdirectory of it
+
+The job file specification tells fio to target a directory instead of a file.  fio --client
+will then generate unique filenames for every pair of (host, job-number) combinations
+so that no 2 fio jobs will access the same pathname.  See [fio
+documentation](https://fio.readthedocs.io/en/latest/fio_doc.html#client-server) for details.
+
 # data persistence
 
 Performance of writes is usually only interesting if we know that the writes are persistent (will be visible after a client or server abrupt reset (i.e. crash or power-cycle).  Otherwise you may be just writing to RAM.  For sequential writes, this can be accomplished with the fio jobfile parameter **fsync_on_close=1** . For random writes, this can be accomplished with the parameter **--sync=1** .  Technically O_DIRECT open flag does not guarantee persistence of writes, and only specifies that writes bypass buffer cache.  For example, it is possible to do an O_DIRECT write and have it not be persistent if it reaches block device hardware but was never actually written to persistent storage there, and yes this can happen.  O_SYNC means that the driver both issues the write and blocks until the write is guaranteed to persist.  
