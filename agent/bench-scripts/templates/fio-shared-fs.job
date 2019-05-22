@@ -8,7 +8,6 @@
 
 [global]
 bs = $@
-runtime = 30
 ioengine = libaio
 iodepth = 32
 direct = 1
@@ -25,7 +24,8 @@ log_hist_msec = 10000
 # log_hist_coarseness = 4 # 76 bins
 
 [TheJob]
+runtime = $runtime
 directory = $target
 rw = $@
-size = 4096M
-numjobs = 1
+size = $size
+numjobs = $numjobs
