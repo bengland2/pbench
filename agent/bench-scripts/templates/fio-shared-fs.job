@@ -28,4 +28,6 @@ runtime = $runtime
 directory = $target
 rw = $@
 size = $size
-numjobs = $numjobs
+# if you want to specify more than 1 process per fio client host/pod,
+# uncomment this next line and add --numjobs=K to your pbench-fio command
+#numjobs = $numjobs
