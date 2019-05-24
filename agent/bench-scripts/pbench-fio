@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # -*- mode: shell-script; indent-tabs-mode: t; sh-basic-offset: 8; sh-indentation: 8; sh-indent-for-case-alt: + -*-
 
 # This is a script to run the fio benchmark
