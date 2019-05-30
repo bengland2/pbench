@@ -136,6 +136,7 @@ Collecting system information
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/fio_slat.1.log
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/hist
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/hist/hist.csv
+/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/pbench-clients.list
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/result.json
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/tools-default
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/tools-default/localhost
@@ -384,6 +385,7 @@ Collecting system information
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/fio_slat.1.log
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/hist
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/hist/hist.csv
+/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/pbench-clients.list
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/result.json
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/tools-default
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/tools-default/localhost
@@ -632,6 +634,7 @@ Collecting system information
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/fio_slat.1.log
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/hist
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/hist/hist.csv
+/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/pbench-clients.list
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/result.json
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/tools-default
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/tools-default/localhost
@@ -850,6 +853,7 @@ Collecting system information
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/tools-default/localhost/turbostat/turbostat-stderr.txt
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/tools-default/localhost/turbostat/turbostat-stdout.txt
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/tools-default/localhost/turbostat/turbostat.cmd
+/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/fio-client.file
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/generate-benchmark-summary.cmd
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/metadata.log
 /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/sysinfo
@@ -876,19 +880,19 @@ Collecting system information
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] opening port 8765 on firewall on the clients
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] killing any old fio process on the clients
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] starting new fio process on the clients
-/var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] fio: Going to run [/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/fio.job  --client=foo --client=bar --max-jobs=2]
+/var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] fio: Going to run [/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/fio.job  --client=/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/pbench-clients.list --max-jobs=2]
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] post-processing fio result
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] creating directories on the clients
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] opening port 8765 on firewall on the clients
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] killing any old fio process on the clients
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] starting new fio process on the clients
-/var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] fio: Going to run [/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/fio.job  --client=foo --client=bar --max-jobs=2]
+/var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] fio: Going to run [/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/fio.job  --client=/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/pbench-clients.list --max-jobs=2]
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] post-processing fio result
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] creating directories on the clients
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] opening port 8765 on firewall on the clients
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] killing any old fio process on the clients
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] starting new fio process on the clients
-/var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] fio: Going to run [/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/fio.job  --client=foo --client=bar --max-jobs=2]
+/var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] fio: Going to run [/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/fio.job  --client=/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/pbench-clients.list --max-jobs=2]
 /var/tmp/pbench-test-bench/pbench/pbench.log:[debug][1900-01-01T00:00:00.000000] post-processing fio result
 /var/tmp/pbench-test-bench/pbench/pbench.log:[warn][1900-01-01T00:00:00.000000] [pbench-collect-sysinfo]mpstat does not exist in /var/tmp/pbench-test-bench/opt/pbench-agent/tool-scripts; spurious file perhaps? Please consider deleting it.
 /var/tmp/pbench-test-bench/pbench/pbench.log:[warn][1900-01-01T00:00:00.000000] [pbench-collect-sysinfo]sar does not exist in /var/tmp/pbench-test-bench/opt/pbench-agent/tool-scripts; spurious file perhaps? Please consider deleting it.
@@ -898,9 +902,9 @@ Collecting system information
 /var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/bench-scripts/postprocess/process-iteration-samples /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB readwrite_IOPS 5 0 6 y y
 /var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/bench-scripts/postprocess/process-iteration-samples /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB readwrite_IOPS 5 0 6 y y
 /var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/bench-scripts/postprocess/process-iteration-samples /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB readwrite_IOPS 5 0 6 y y
-/var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --client=foo --client=bar --max-jobs=2 --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/fio.job
-/var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --client=foo --client=bar --max-jobs=2 --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/fio.job
-/var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --client=foo --client=bar --max-jobs=2 --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/fio.job
+/var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --client=/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/pbench-clients.list --max-jobs=2 --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/fio.job
+/var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --client=/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/pbench-clients.list --max-jobs=2 --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/2-throughput-64KiB/sample1/fio.job
+/var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/bm --client=/var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/pbench-clients.list --max-jobs=2 --output-format=json /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/3-throughput-1024KiB/sample1/fio.job
 /var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/fio-histo-log-pctiles.py --time-quantum 10 --percentiles 0 50 90 95 99 100 -- /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/clients/*/fio_clat_hist.*.log*
 /var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/fio-histo-log-pctiles.py --time-quantum 10 --percentiles 0 50 90 95 99 100 -- /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/clients/bar/fio_clat_hist.*.log*
 /var/tmp/pbench-test-bench/test-execution.log:/var/tmp/pbench-test-bench/opt/pbench-agent/unittest-scripts/fio-histo-log-pctiles.py --time-quantum 10 --percentiles 0 50 90 95 99 100 -- /var/tmp/pbench-test-bench/pbench/fio_test-05_1900.01.01T00.00.00/1-throughput-4KiB/sample1/clients/foo/fio_clat_hist.*.log*
